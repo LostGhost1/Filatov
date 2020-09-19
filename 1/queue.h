@@ -6,6 +6,7 @@ struct queue{
 	int *last;
 };
 void *queue_new();
+char queue_isempty(struct queue *q);
 void queue_add(struct queue *q, int value);
 int queue_pop(struct queue *q);
 struct queue *queue_copy(struct queue *q);

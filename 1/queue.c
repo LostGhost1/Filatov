@@ -9,6 +9,9 @@ void *queue_new(){
 	q->last=NULL;
 	return q;
 }
+char queue_isempty(struct queue *q){
+	return ((q->length)==0);
+}
 void queue_add(struct queue *q, int value){
 	if(q==NULL)return;
 	if((q->aptr==NULL)&&(q->length!=0)){
