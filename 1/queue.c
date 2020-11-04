@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-
+int entries;
 void *queue_new(unsigned long long *return_n){//10
 	unsigned long long n=*return_n;
 	struct queue *q=malloc(sizeof(struct queue));
@@ -68,114 +68,111 @@ int queue_pop(struct queue *q, unsigned long long *return_n){//21
 	*return_n=n;
 	return result;//+1
 }
-void queue_set(struct queue *q, unsigned int index, int value, unsigned long long *return_n){//22+6n
+
+void queue_set(struct queue *q, unsigned int index, int value, unsigned long long *return_n){
 	unsigned long long n=*return_n;
-	if(q==NULL)return;
-	if((q->aptr==NULL)||q->length==0)return;
-	int *arrcpy=malloc(sizeof(int)*(q->length));//1+1+1+1+1
+	n+=1;
+	for(int i=index;i<q->length-1;i++){
+		n+=4;
+		queue_add(q,queue_pop(q,&n),&n);
+		n+=9;
+	}
+	queue_pop(q,&n);
+	n+=4;
+	queue_add(q,value,&n);
 	n+=5;
-	memmove(arrcpy,q->aptr,(q->length)*sizeof(int));//1+1+1+1+1+1+1
-	n+=7;
-	arrcpy[index]=value;//1+1
-	n+=2;
-	free(q->aptr);//1+1+1
-	n+=3;
-	q->aptr=NULL;//1+1
-	n+=2;
-	n+=3;
-	for(int i=q->length-1;i>=0;i--){//3+sigma(1+1+(1+1+1+1))=3+6n
-		n+=2;	
-		queue_add(q,arrcpy[i],&n);//1+1+1+1+1+1
-		n+=6;
+	n+=1;
+	for(int i=0;i<index;i++){
+		n+=2;
+		queue_add(q,queue_pop(q,&n),&n);
+		n+=9;
 	}
 	*return_n=n;
 }
-int queue_get(struct queue *q, unsigned int index, unsigned long long *return_n){//86+25n
+int queue_get(struct queue *q, unsigned int index, unsigned long long *return_n){
 	unsigned long long n=*return_n;
-	if((q->aptr==NULL)||q->length==0)return 0;
-	unsigned int trueind=q->length-index;//1+1+1
-	n+=3;
-	struct queue *tmp=queue_copy(q,&n);//28
 	n+=1;
-	for(int i=0;i<trueind-1;i++){//1+sigma(2+1+(21+1))=1+25n
+	for(int i=index;i<q->length-1;i++){
+		n+=4;
+		queue_add(q,queue_pop(q,&n),&n);
+		n+=9;
+	}
+	int result=queue_pop(q,&n);
+	n+=4;
+	queue_add(q,result,&n);
+	n+=5;
+	n+=1;
+	for(int i=0;i<index;i++){
+		n+=2;
+		queue_add(q,queue_pop(q,&n),&n);
+		n+=9;
+	}
+
+	n+=1;
+	*return_n=n;
+	return result;
+}
+void queue_out(struct queue *q){
+	unsigned long long trash=0;
+	if(q==NULL) return;
+	for(int i=0;i<q->length;i++)
+		printf("%d ",q->aptr[i]);
+	printf("\n");
+}
+
+int partition (struct queue *q, int low, int high, unsigned long long *return_n) //0.67*n
+{ 
+	unsigned long long n=*return_n;
+	int pivot = queue_get(q,high,&n);
+	n+=5;
+	int i = (low - 1);   
+	n+=1;
+	n+=1;
+	for (int j = low; j <= high- 1; j++) 
+	{
 		n+=3;
-		queue_pop(tmp,&n);//21+1
-	}
-	int result=queue_pop(tmp,&n);//21+1+1
-	queue_delete(tmp,&n);//7+1
-	*return_n=n;
-	return result;//1
-}
-struct queue *queue_copy(struct queue *q, unsigned long long *return_n){//28
-	unsigned long long n=*return_n;
-	if(q==NULL) return NULL;
-	struct queue *copy=malloc(sizeof(struct queue));//1+1+1
-	n+=3;
-	int *aptr=malloc(sizeof(int)*(q->length));//1+1+1+1+1
-	n+=5;
-	memcpy(aptr,q->aptr,sizeof(int)*(q->length));//1+1+1+1+1+1+1
-	n+=7;
-	copy->aptr=aptr;//1+1
-	n+=2;
-	copy->length=q->length;//1+1+1
-	n+=3;
-	copy->last=copy->aptr+(copy->length-1);//1+1+1+1+1+1
+		n+=6;
+		if (queue_get(q,j,&n) <= pivot) 
+		{ 
+			entries+=1;
+			i++;
+			n+=1;
+			int t=queue_get(q,i,&n);
+			n+=5;
+			queue_set(q,i,queue_get(q,j,&n),&n);
+			n+=11;
+			queue_set(q,j,t,&n);
+			n+=6;
+		} 
+	} 
+	int t=queue_get(q,i+1,&n);
 	n+=6;
-	n+=1;
+	queue_set(q,i+1,queue_get(q,high,&n),&n);
+	n+=11;
+	queue_set(q,high,t,&n);
+	n+=6;
+	n+=2;
 	*return_n=n;
-	return copy;//1
-}
-//void queue_out(struct queue *q){
-//	if(q==NULL) return;
-//	struct queue *tmp=queue_copy(q);
-//	while(tmp->length>0){
-//		printf("%d ",queue_pop(tmp));
-//	}
-//}
-int queue_sort(struct queue *q, int left, int right, unsigned long long *return_n)
-{
+	return (i + 1); 
+} 
+  
+
+void queue_sort(struct queue *q, int low, int high, unsigned long long *return_n) //1.34*n
+{ 
+
 	unsigned long long n=*return_n;
-	if(q==NULL) return 0;
-	long base, opposite, p;
-	int c;
-	base=left;//1
 	n+=1;
-	opposite=right;//1
-	n+=1;
-	while (base!=opposite){//sigma(1+429+87n)=430n+87n^2
-		n+=1;
-		if ((queue_get(q,base,&n)>queue_get(q,opposite,&n))^(base>opposite)){//86+25n+2+1+86+25n+2+1+1
-			n+=3;
-			c=queue_get(q,base,&n);//1+1+1+86+25n
-			queue_set(q,base,queue_get(q,opposite,&n),&n);//25+6n+1+1+1+1+1+86+25n
-			queue_set(q,opposite,c,&n);//25+6n+1+1+1
-			p=base;//+1
-			n+=1;
-			base=opposite;//+1
-			n+=1;
-			n+=1;
-			if (p<opposite)//+1
-				{
-					opposite=p+1;
-					n+=2;
-				} else 
-				{
-					opposite=p-1;//1+1
-					n+=2;
-				}
-		} else {
-			n+=1;
-			if (base<opposite)
-				opposite--; else opposite++;
-			n+=1;
-		};
-	};
-	n+=2;
-	if (left<base-1) queue_sort(q,left,base-1,&n);
-	n+=2;
-	if (base+1<right) queue_sort(q,base+1,right,&n);
+	if (low < high) 
+	{ 
+		int pivot = partition(q, low, high,&n); 
+		n+=5;
+		queue_sort(q, low, pivot - 1,&n); 
+		n+=5;
+		queue_sort(q, pivot + 1, high,&n); 
+		n+=5;
+	} 
 	*return_n=n;
-};
+} 
 void queue_delete(struct queue *q, unsigned long long *return_n){//7
 	unsigned long long n=*return_n;
 	if(q==NULL) return;

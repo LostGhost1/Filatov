@@ -1,9 +1,5 @@
 all: queue
-queue: queue.o main.o
-	gcc -o queue queue.o main.o
-queue.o: queue.c
-	gcc -c queue.c
-main.o: main.c
-	gcc -c main.c
+queue: queue.c main.c
+	gcc -o queue -g queue.c main.c
 clean:
-	rm *.o queue
+	rm queue
