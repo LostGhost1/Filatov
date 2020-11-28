@@ -16,9 +16,9 @@ int main(int argc, char **argv)
 		struct queue *q=queue_new(&trash);
 		for(int i=0;i<n;i++)
 			queue_add(q,rand()%1000,&trash);
-//		queue_out(q);
+		queue_out(q);
 		queue_sort(q,0,q->length-1,&result);
-//		queue_out(q);
+		queue_out(q);
 		queue_delete(q,&trash);
 		printf("%llu %d\n",result,entries);
 

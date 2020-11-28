@@ -21,7 +21,6 @@ int main()
 	for(int n=1;n<3002;n+=300){
 		result=0;
 		trash=0;
-		
 		struct queue *q=queue_new(&trash);
 		for(int i=0;i<n;i++){
 			queue_add(q,rand()%1000,&trash);
@@ -31,7 +30,7 @@ int main()
 		clock_gettime(CLOCK_REALTIME,&after);
 		queue_delete(q,&trash);
 		timespec_diff(&after,&before,&result_t);
-		printf("%d %llu %d %d ",n,result);
+		printf("%d %llu ",n,result);
 		printf("%lld.%.9ld\n", (long long)result_t.tv_sec, result_t.tv_nsec);
 		fflush(stdout);
 	}

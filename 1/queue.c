@@ -50,7 +50,7 @@ void queue_add(struct queue *q, int value, unsigned long long *return_n){//29
 		q->last=q->aptr+(q->length-1);//1+1+1+1+1+1
 		n+=6;
 		*return_n=n;
-	}	
+	}
 }
 int queue_pop(struct queue *q, unsigned long long *return_n){//21
 	unsigned long long n=*return_n;
@@ -121,19 +121,19 @@ void queue_out(struct queue *q){
 }
 
 int partition (struct queue *q, int low, int high, unsigned long long *return_n) //0.67*n
-{ 
+{
 	unsigned long long n=*return_n;
 	int pivot = queue_get(q,high,&n);
 	n+=5;
-	int i = (low - 1);   
+	int i = (low - 1);
 	n+=1;
 	n+=1;
-	for (int j = low; j <= high- 1; j++) 
+	for (int j = low; j <= high- 1; j++)
 	{
 		n+=3;
 		n+=6;
-		if (queue_get(q,j,&n) <= pivot) 
-		{ 
+		if (queue_get(q,j,&n) <= pivot)
+		{
 			entries+=1;
 			i++;
 			n+=1;
@@ -143,8 +143,8 @@ int partition (struct queue *q, int low, int high, unsigned long long *return_n)
 			n+=11;
 			queue_set(q,j,t,&n);
 			n+=6;
-		} 
-	} 
+		}
+	}
 	int t=queue_get(q,i+1,&n);
 	n+=6;
 	queue_set(q,i+1,queue_get(q,high,&n),&n);
@@ -153,26 +153,25 @@ int partition (struct queue *q, int low, int high, unsigned long long *return_n)
 	n+=6;
 	n+=2;
 	*return_n=n;
-	return (i + 1); 
-} 
-  
+	return (i + 1);
+}
 
 void queue_sort(struct queue *q, int low, int high, unsigned long long *return_n) //1.34*n
-{ 
+{
 
 	unsigned long long n=*return_n;
 	n+=1;
-	if (low < high) 
-	{ 
-		int pivot = partition(q, low, high,&n); 
+	if (low < high)
+	{
+		int pivot = partition(q, low, high,&n);
 		n+=5;
-		queue_sort(q, low, pivot - 1,&n); 
+		queue_sort(q, low, pivot - 1,&n);
 		n+=5;
-		queue_sort(q, pivot + 1, high,&n); 
+		queue_sort(q, pivot + 1, high,&n);
 		n+=5;
-	} 
+	}
 	*return_n=n;
-} 
+}
 void queue_delete(struct queue *q, unsigned long long *return_n){//7
 	unsigned long long n=*return_n;
 	if(q==NULL) return;
