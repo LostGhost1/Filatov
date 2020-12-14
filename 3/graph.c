@@ -2,10 +2,10 @@
 struct graph *graph_new(unsigned long nnodes){
 	struct graph *t=malloc(sizeof(struct graph));
 	t->nnodes=nnodes;
-	t->arr=malloc(sizeof(char*)*nnodes);
+	t->arr=malloc(sizeof(unsigned long long*)*nnodes);
+	t->marks=malloc(sizeof(char*)*nnodes);
 	for(unsigned long long i=0;i<nnodes;i++){
-		t->arr[i]=malloc(sizeof(char)*nnodes);
-
+		t->arr[i]=malloc(sizeof(unsigned long long)*nnodes);
 		for(unsigned long long j=0;j<nnodes;j++){
 			t->arr[i][j]=0;
 		}
@@ -17,7 +17,8 @@ void graph_generate_random(struct graph *g){
 	srand((unsigned) time(&t));
 	for(unsigned long long i=0;i< (g->nnodes);i++)
 		for(unsigned long long j=0;j< (g->nnodes);j++){
-			g->arr[i][j]=(char)(rand()%2-1);
+			g->arr[i][j]=(unsigned long long)(rand()%100);
+			if(rand()%2-1)g->arr[i][j]=0;
 
 		}
 	unsigned long long i=0;
@@ -66,8 +67,11 @@ void graph_find_loops(struct graph *g){
 }
 void graph_out(struct graph *g){
 	for(unsigned long long i=0;i< g->nnodes;i++){
+		printf("%s\n",(!g->marks[i])?"null":g->marks[i]);
+	}
+	for(unsigned long long i=0;i< g->nnodes;i++){
 		for(unsigned long long j=0;j< g->nnodes;j++)
-			printf("%c",(g->arr[i][j])?'1':'0');
+			printf("%3llu",g->arr[i][j]);
 		printf("\n");
 	}
 	printf("---------------------------\n");
@@ -87,8 +91,70 @@ void graph_out(struct graph *g){
 
 }
 void graph_delete(struct graph *g){
-	for(int i=0;i< g->nnodes;i++)
+	for(unsigned long long i=0;i< g->nnodes;i++)
 		free(g->arr[i]);
 	free(g->arr);
 	g->nnodes=0;
 }
+unsigned long long first(struct graph *g, unsigned long long v){
+	for(unsigned long long i=0;i< g->nnodes; i++){
+		if(g->arr[i][v])return i;
+	}
+	return A;
+}
+unsigned long long next(struct graph *g, unsigned long long v, unsigned long long j){
+	for(unsigned long long i=j+1;i< g->nnodes; i++){
+		if(g->arr[i][v])return i;
+	}
+	return A;
+}
+char *vertex(struct graph *g, unsigned long long v, unsigned long long j){
+	unsigned long long count=0;
+	for(unsigned long long i=0;i< g->nnodes;i++){
+		if(g->arr[i][v])count+=1;
+		if(!(count-j))return &(g->arr[i][v]);
+	}
+}
+unsigned long long add_v(struct graph *g, char *mark){
+	for(unsigned long long i=0;i< g->nnodes;i++){
+		g->arr[i]=realloc(g->arr[i],sizeof(unsigned long long)*(g->nnodes+1));
+		g->arr[i][g->nnodes]=0;
+	}
+	g->arr=realloc(g->arr,sizeof(unsigned long long*)*(g->nnodes+1));
+	g->arr[g->nnodes]=calloc(sizeof(unsigned long long)*(g->nnodes+1),1);
+	g->nnodes+=1;
+	g->marks[g->nnodes-1]=strdup(mark);
+	return g->nnodes-1;
+}
+void add_e(struct graph *g, unsigned long long from, unsigned long long to, unsigned long long weight){
+	g->arr[from][to]=weight;
+}
+void del_v(struct graph *g, unsigned long long v){
+	free(g->arr[v]);
+	if(g->marks[v]){
+		g->marks[v]=NULL;
+	}
+	for(unsigned long long i=v;i< g->nnodes -1;i++){
+		g->arr[i]=g->arr[i+1];
+		g->marks[i]=g->marks[i+1];
+	}
+	for(unsigned long long i=0;i< g->nnodes-1;i++){
+		for(unsigned long long j=v;j< g->nnodes; j++){
+			g->arr[i][j]=g->arr[i][j+1];
+		}
+		g->arr[i]=realloc(g->arr[i],sizeof(unsigned long long)*(g->nnodes-1));
+	}
+	g->arr=realloc(g->arr,sizeof(unsigned long long*)*(g->nnodes-1));
+	g->nnodes-=1;
+}
+void del_e(struct graph *g, unsigned long long from, unsigned long long to){
+	g->arr[from][to]=0;
+}
+void edit_v(struct graph *g, unsigned long long index, char *mark){
+	free(g->marks[index]);
+	g->marks[index]=mark;
+}
+void edit_e(struct graph *g, unsigned long long from, unsigned long long to, unsigned long long weight){
+	g->arr[from][to]=weight;
+}
+
