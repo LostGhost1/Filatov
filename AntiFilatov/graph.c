@@ -12,6 +12,7 @@ void graph_menu(){
 	printf("%d. Найти хроматическое число графа (неориентированного).\n",++optionn);
 	printf("%d. Найти максимальный поток/минимальный разрез (одно и то же число).\n",++optionn);
 	printf("%d. Найти кратчайшее расстояние от v0 до наиболее удаленной вершины.\n",++optionn);
+	printf("%d. Найти число компонент связности.\n",++optionn);
 	printf("%d. Выход.\n",++optionn);
 	int option=0;
 	scanf("%d",&option);
@@ -22,10 +23,94 @@ void graph_menu(){
 	if(option==5)graph_find_chrome(g);
 	if(option==6)graph_find_flow(g);
 	if(option==7)graph_not_dejkstra(g);
-	if(option==8)return;
+	if(option==8)graph_component_number(g);
+	if(option==9)return;
 	}
 }
 char *visited=NULL;
+char pathexists(struct graph *g, unsigned long long from, unsigned long long to){
+	if(from==to)return 1;
+	visited[from]=1;
+	for(unsigned long long i=0;i<g->nnodes;i++){
+		if(g->arr[from][i])if(!visited[i])
+			if(pathexists(g,i,to)){	visited[from]=0;return 1;}
+	}
+	visited[from]=0;
+	return 0;
+}
+char path_print(struct graph *g, unsigned long long from, unsigned long long to){
+	if(from==to){printf("%llu ",to);return 1;}
+	visited[from]=1;
+	for(unsigned long long i=0;i<g->nnodes;i++){
+		if(g->arr[from][i])if(!visited[i])
+			if(path_print(g,i,to)){	visited[from]=0; printf("%llu ",from); return 1;}
+	}
+	visited[from]=0;
+	return 0;
+}
+
+char check_components(struct graph *g, char *components, char ncomponent){
+	for(unsigned long long i=0; i<ncomponent; i++){
+		for(unsigned long long j=0;j<g->nnodes;j++){
+			if(components[j]!=(i+1)){continue;}
+			for(unsigned long long k=0; k<g->nnodes; k++){
+				if(components[k]!=(i+1))continue;
+				if(k==j)continue;
+				//printf("Checking path between %llu and %llu\n",j,k);
+				if(!pathexists(g,k,j))return 0;
+			}
+		}
+	}
+	return 1;
+}
+void components_increment(struct graph *g, char *components, char *ncomponent){
+	char needtoincrement=1;
+	for(unsigned long long i=0;((i<g->nnodes)&&(needtoincrement));i++){
+		needtoincrement=0;
+		components[i]+=1;
+		if(components[i]>(*ncomponent)){
+			components[i]=1;
+			needtoincrement=1;
+		}
+	}
+	if(needtoincrement){
+		*ncomponent+=1;
+		for(unsigned long long i=0;i<g->nnodes;i++)
+			components[i]=1;
+	}
+	
+}
+
+void graph_component_number(struct graph *g){
+	char *component = malloc(sizeof(char)*g->nnodes);
+	char ncomponent=1;
+	for(unsigned long long i=0;i< g->nnodes;i++){
+		component[i]=1;
+	}
+	visited=calloc(1,g->nnodes);
+	while(!check_components(g, component, ncomponent)){
+		components_increment(g,component,&ncomponent);
+	}
+	printf("Кол-во компонент:\n%llu\n",ncomponent);
+	printf("Принадлежность вершин к компонентам:\n");
+	for(unsigned long long i=0; i< g->nnodes; i++){
+		printf("%llu ",component[i]);
+	}
+		free(visited);
+		visited=calloc(1,g->nnodes);
+	printf("\nПути:\n");
+	for(unsigned long long i=0;i<g->nnodes;i++){
+		for(unsigned long long j=0;j<g->nnodes;j++){
+			if(i==j)continue;
+			printf("Путь от %llu до %llu\n",i,j);
+			char result=path_print(g,i,j);
+//			if(result)printf("Path exists\n");else printf("No path\n");
+			printf("\n");
+		}
+	}
+	free(visited);
+	free(component);
+}
 void graph_not_dejkstra(struct graph *g){
 	printf("Введите номер изначальной вершины\n");
 	unsigned long long start=0;
@@ -50,7 +135,7 @@ char checkcolors(struct graph *g, char *colors){
 	}
 	return 1;
 }
-void increment(struct graph *g, char *colors, unsigned long long *ncolors){
+void colors_increment(struct graph *g, char *colors, unsigned long long *ncolors){
 	char needtoincrement=1;
 	for(unsigned long long i=0;((i<g->nnodes)&&(needtoincrement));i++){
 		needtoincrement=0;
@@ -108,7 +193,7 @@ void graph_find_chrome(struct graph *g){
 		colors[i]=1;
 	unsigned long long ncolors=1;
 	while(!checkcolors(g,colors)){
-		increment(g,colors,&ncolors);
+		colors_increment(g,colors,&ncolors);
 	}
 	printf("Раскрашено %llu цветами\n",ncolors);
 	printf("Цвета:\n");
