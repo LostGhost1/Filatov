@@ -22,7 +22,7 @@ void graph_menu(){
 	if(option==5)graph_find_chrome(g);
 	if(option==6)graph_find_flow(g);
 	if(option==7)graph_not_dejkstra(g);
-	if(option==7)return;
+	if(option==8)return;
 	}
 }
 char *visited=NULL;
